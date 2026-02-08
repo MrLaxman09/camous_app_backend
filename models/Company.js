@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const companySchema = new mongoose.Schema(
   {
@@ -7,26 +7,38 @@ const companySchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    logoUrl: {
+      type: String,
+    },
+    arrivalDate: {
+      type: Date,
+      required: true,
+    },
+    cgpaRequired: {
+      type: Number,
+      required: true,
+      min: 0,
+      max: 10,
+    },
     role: {
       type: String,
       required: true,
     },
-    ctc: {
-      type: String,
+    openings: {
+      type: Number,
       required: true,
+      min: 1,
     },
     location: {
       type: String,
-      default: "On-Campus",
+      required: true,
     },
-    status: {
+    jdUrl: {
       type: String,
-      enum: ["upcoming", "visited"],
-      default: "upcoming",
     },
-    visitDate: {
-      type: Date,
-      default: null,
+    registeredCount: {
+      type: Number,
+      default: 0,
     },
   },
   { timestamps: true }

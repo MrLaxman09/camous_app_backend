@@ -1,82 +1,101 @@
 const Company = require("../models/Company");
 
-// ➕ Add Company
-exports.addCompany = async (req, res) => {
+// CREATE COMPANY
+exports.createCompany = async (req, res) => {
   try {
-    const { companyName, role, ctc, location, status, visitDate } = req.body;
-
-    const company = await Company.create({
-      companyName,
-      role,
-      ctc,
-      location,
-      status,
-      visitDate,
-    });
+    const company = await Company.create(req.body);
 
     res.status(201).json({
       success: true,
-      message: "Company added successfully",
       company,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 };
 
-// 📋 Get All Companies
+// GET ALL COMPANIES
 exports.getAllCompanies = async (req, res) => {
   try {
     const companies = await Company.find().sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
-      total: companies.length,
+      count: companies.length,
       companies,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 };
 
-// ✏️ Update Company
-exports.updateCompany = async (req, res) => {
+// GET SINGLE COMPANY
+exports.getCompanyById = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const company = await Company.findByIdAndUpdate(id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const company = await Company.findById(req.params.id);
 
     if (!company) {
       return res.status(404).json({
         success: false,
-        message: "Company not found",
+        error: "Company not found",
       });
     }
 
     res.status(200).json({
       success: true,
-      message: "Company updated successfully",
       company,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 };
 
-// ❌ Delete Company
-exports.deleteCompany = async (req, res) => {
+// UPDATE COMPANY
+exports.updateCompany = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const company = await Company.findByIdAndDelete(id);
+    const company = await Company.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
 
     if (!company) {
       return res.status(404).json({
         success: false,
-        message: "Company not found",
+        error: "Company not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      company,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+};
+
+// DELETE COMPANY
+exports.deleteCompany = async (req, res) => {
+  try {
+    const company = await Company.findByIdAndDelete(req.params.id);
+
+    if (!company) {
+      return res.status(404).json({
+        success: false,
+        error: "Company not found",
       });
     }
 
@@ -85,6 +104,9 @@ exports.deleteCompany = async (req, res) => {
       message: "Company deleted successfully",
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 };

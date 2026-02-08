@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema({
     trim: true,
     maxlength: [50, 'Name cannot be more than 50 characters']
   },
+
   email: {
     type: String,
     required: [true, 'Please add an email'],
@@ -18,38 +19,56 @@ const userSchema = new mongoose.Schema({
       'Please add a valid email'
     ]
   },
+
+  enrollmentNo: {
+    type: String,
+    required: true,
+    uppercase: true,
+    trim: true,
+    match: [/^[0-9A-Z]+$/, 'Enrollment must be capital letters & numbers only']
+  },
+
+  course: {
+    type: String,
+    required: true,
+    trim: true
+  },
+
   password: {
     type: String,
-    required: [true, 'Please add a password'],
-    minlength: [6, 'Password must be at least 6 characters'],
+    required: true,
     select: false
   },
+
   role: {
     type: String,
     enum: ['user', 'admin'],
     default: 'user'
   },
+
   createdAt: {
     type: Date,
     default: Date.now
   }
 });
 
-// ✅ FIXED PRE-SAVE HOOK (MOST IMPORTANT FIX)
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) {
-    return next();   // 🔥 THIS WAS MISSING BEFORE
-  }
+// Hash password before saving
+userSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
 
-  const salt = await bcrypt.genSalt(
-    parseInt(process.env.BCRYPT_SALT_ROUNDS || "10")
-  );
-  this.password = await bcrypt.hash(this.password, salt);
-  next();
+  try {
+    const salt = await bcrypt.genSalt(
+      parseInt(process.env.BCRYPT_SALT_ROUNDS || "10")
+    );
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
-// Compare password
-userSchema.methods.comparePassword = async function(enteredPassword) {
+// Compare password method
+userSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 

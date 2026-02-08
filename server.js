@@ -17,6 +17,8 @@ connectDB();
 // Import routes
 const authRoutes = require('./routes/authRoutes');
 const companyRoutes = require('./routes/companyRoutes');
+const studentRoutes = require("./routes/studentRoutes");
+const placementRoutes = require("./routes/placementRoutes");
 
 // ======== MIDDLEWARES ======== //
 app.use(express.json());
@@ -25,22 +27,21 @@ app.use(cookieParser());
 // ======== CORS CONFIG ======== //
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === 'production'
-        ? process.env.CLIENT_URL
-        : [
-            'http://localhost:5173',
-            'http://localhost:8080'
-          ],
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:8080"
+    ],
     credentials: true,
   })
 );
 
 // ======== ROUTES ======== //
 app.use('/api/auth', authRoutes);
-app.use('/api/company', companyRoutes);
+app.use('/api/companies', companyRoutes);
+app.use('/api/students', studentRoutes);
+app.use('/api/placements', placementRoutes);
 
-// Test Route (Health Check)
+// Health check
 app.get('/', (req, res) => {
   res.status(200).json({
     success: true,
@@ -49,14 +50,14 @@ app.get('/', (req, res) => {
   });
 });
 
-// Error handler (ALWAYS LAST)
+// Error handler
 app.use(errorHandler);
 
 // Start server
 const PORT = process.env.PORT || 5000;
 
 const server = app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
 
 // Handle unhandled promise rejections

@@ -2,7 +2,7 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 
-// Generate JWT Token (safer: read directly from .env)
+// Generate JWT Token
 const generateToken = (id) => {
   return jwt.sign(
     { id },
@@ -11,7 +11,7 @@ const generateToken = (id) => {
   );
 };
 
-// Send token + user response (VERY IMPORTANT FOR ROLE-BASED LOGIN)
+// Send token + user response
 const sendTokenResponse = (user, statusCode, res) => {
   const token = generateToken(user._id);
 
@@ -34,7 +34,9 @@ const sendTokenResponse = (user, statusCode, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role,   // 🔥 THIS IS WHAT FRONTEND WILL USE
+        enrollmentNo: user.enrollmentNo,
+        course: user.course,
+        role: user.role
       },
     });
 };
@@ -50,8 +52,9 @@ exports.register = async (req, res, next) => {
       });
     }
 
-    const { name, email, password, role } = req.body;
+    const { name, email, password, enrollmentNo, course } = req.body;
 
+    // Check if user exists with email
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({
@@ -60,15 +63,24 @@ exports.register = async (req, res, next) => {
       });
     }
 
+    // Create user
     const user = await User.create({
       name,
       email,
+      enrollmentNo,
+      course,
       password,
-      role: role || 'user',
+      role: 'user'
     });
 
     sendTokenResponse(user, 201, res);
   } catch (err) {
+    if (err.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        error: 'Email already registered'
+      });
+    }
     next(err);
   }
 };
@@ -103,7 +115,6 @@ exports.login = async (req, res, next) => {
       });
     }
 
-    // ✅ THIS WILL SEND role TO FRONTEND
     sendTokenResponse(user, 200, res);
   } catch (err) {
     next(err);
@@ -113,7 +124,14 @@ exports.login = async (req, res, next) => {
 // ================= GET CURRENT USER =================
 exports.getMe = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id).select("-password");
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        error: "User not found",
+      });
+    }
 
     res.status(200).json({
       success: true,
@@ -123,6 +141,7 @@ exports.getMe = async (req, res, next) => {
     next(err);
   }
 };
+
 
 // ================= LOGOUT =================
 exports.logout = async (req, res, next) => {
@@ -147,6 +166,7 @@ exports.updateDetails = async (req, res, next) => {
     const fieldsToUpdate = {
       name: req.body.name,
       email: req.body.email,
+      course: req.body.course
     };
 
     const user = await User.findByIdAndUpdate(req.user.id, fieldsToUpdate, {
@@ -171,7 +191,7 @@ exports.updatePassword = async (req, res, next) => {
     if (!(await user.comparePassword(req.body.currentPassword))) {
       return res.status(401).json({
         success: false,
-        error: 'Password is incorrect',
+        error: 'Current password is incorrect',
       });
     }
 
