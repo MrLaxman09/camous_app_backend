@@ -6,6 +6,8 @@ const {
   deletePlacement,
   getPlacementCount,
   getAveragePackage,
+  getHighestPackage,
+  getAnalytics,
 } = require("../controllers/placementController");
 
 const router = express.Router();
@@ -16,5 +18,7 @@ router.put("/update/:id", updatePlacement);
 router.delete("/delete/:id", deletePlacement);
 router.get("/count", getPlacementCount);
 router.get("/average-package", getAveragePackage);
+router.get("/highest-package", getHighestPackage);
+router.get("/analytics", getAnalytics);
 
 module.exports = router;
