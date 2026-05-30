@@ -24,7 +24,17 @@ app.use(express.json());
 app.use(cookieParser());
 
 // ======== CORS ======== //
-app.use(cors());
+const cors = require("cors");
+
+app.use(
+  cors({
+    origin: [
+      "http://localhost:8080",
+      "https://tnprkdf.netlify.app"
+    ],
+    credentials: true
+  })
+);
 
 // ======== ROUTES ======== //
 app.use("/api/auth", authRoutes);
