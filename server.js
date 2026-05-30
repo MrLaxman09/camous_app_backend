@@ -29,7 +29,7 @@ const cors = require("cors");
 // ======== CORS ======== //
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://rkdftnp.netlify.app", "http://localhost:8080", "http://localhost:8081"],
+    origin: ["http://localhost:5173", "https://tnprkdf.netlify.app", "http://localhost:8080", "http://localhost:8081"],
     credentials: true,
   }),
 );
